@@ -1,4 +1,7 @@
 import http from "node:http";
+import { json } from "./middleware/json.js";
+import { routes } from "./router.js";
+import { extractQueryParams } from "./utils/extract-query-params.js";
 
 /*
 - Criar usuários
@@ -9,44 +12,34 @@ import http from "node:http";
 
 */
 
-const tasks = [];
-
 //const database = new Database();
 
 const server = http.createServer(async (req, res) => {
-  const { method, url } = req;
+  const { method, url } = req; // Extrai o método e a URL da requisição.
 
-  const buffers = [];
+  await json(req, res);
 
-  for await (const chunck of req) {
-    buffers.push(chunck);
+  const route = routes.find((route) => {
+    return route.method === method && route.path.test(url);
+  });
+
+  // Verificação única - Para encontrar a rota correta
+  if (route) {
+    const routeParams = req.url.match(route.path);
+
+    ///console.log(extractQueryParams(routeParams.groups.query));
+
+    const { query, ...params } = routeParams.groups;
+
+    req.params = params;
+    req.query = query ? extractQueryParams(query) : {};
+
+    //console.log(params);
+
+    return route.handler(req, res);
   }
-
-  const body = JSON.parse(Buffer.concat(buffers).toString());
-  console.log(body.title);
-
-  //await json(req, res);
-
-  if (method === "GET" && url === "/tasks") {
-    //const tasks = database.select("tasks");
-    //return res.end(JSON.stringify(tasks));
-    return res
-      .setHeader("Content-type", "application/json")
-      .end(JSON.stringify(tasks));
-  }
-
-  if (method === "POST" && url === "/tasks") {
-    //const
-    tasks.push({
-      id: 1,
-      title: "JavaScrip",
-      description: "Módulo Avançado de JavaScript Assincrono .....",
-    });
-
-    return res.writeHead(201).end();
-  }
-
-  return res.writeHead(404).end();
+  // console.log(route);
+  return res.writeHead(404).end("Not Found");
 });
 
 server.listen(3335);

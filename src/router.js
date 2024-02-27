@@ -12,15 +12,10 @@ export const routes = [
     handler: (req, res) => {
       const { search } = req.query;
 
-      const tasks = database.select(
-        "tasks",
-        search
-          ? {
-              title: search,
-              description: search,
-            }
-          : null
-      );
+      const tasks = database.select("tasks", {
+        title: search,
+        description: search,
+      });
       return res.end(JSON.stringify(tasks));
     },
   },
@@ -29,12 +24,23 @@ export const routes = [
     method: "POST",
     path: buildRoutePath("/tasks"),
     handler: (req, res) => {
-      const { name, email } = req.body;
+      const { title, description } = req.body;
+
+      if (!title) {
+        return res.writeHead(400).end("Title são campos obrigatórios.");
+      }
+
+      if (!description) {
+        return res.writeHead(400).end("Description são campos obrigatórios.");
+      }
 
       const task = {
         id: randomUUID(),
         title,
         description,
+        completed_at: null,
+        created_at: new Date(),
+        updated_at: new Date(),
       };
 
       database.insert("tasks", task);

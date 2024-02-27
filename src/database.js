@@ -1,4 +1,3 @@
-/*
 import fs from "node:fs/promises";
 
 const databasePath = new URL("../db.json", import.meta.url);
@@ -22,6 +21,8 @@ export class Database {
     fs.writeFile(databasePath, JSON.stringify(this.#database));
   }
 
+  // Define um método para selecionar dados de uma tabela.
+  // Filtrando lista do banco de dados
   select(table, search) {
     let data = this.#database[table] ?? []; // Obtém os dados da tabela especificada, se não houver dados, retorna um array vazio.
 
@@ -36,6 +37,7 @@ export class Database {
     return data; // Retorna os dados obtidos.
   }
 
+  // Define um método para inserir dados em uma tabela.
   insert(table, data) {
     if (Array.isArray(this.#database[table])) {
       // // Verifica se já existe uma entrada para a tabela no banco de dados.
@@ -50,4 +52,3 @@ export class Database {
     return;
   }
 }
-*/

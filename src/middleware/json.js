@@ -1,4 +1,3 @@
-/*
 export async function json(req, res) {
   const buffers = [];
 
@@ -14,4 +13,3 @@ export async function json(req, res) {
   }
   res.setHeader("Content-type", "application/json");
 }
-*/

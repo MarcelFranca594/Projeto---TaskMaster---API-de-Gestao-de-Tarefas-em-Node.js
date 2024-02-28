@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { Database } from "./database.js";
 import { buildRoutePath } from "./utils/build-route-path.js";
-import { json } from "./middleware/json.js";
 
 const database = new Database();
 
@@ -102,6 +101,31 @@ export const routes = [
 
       // Se a task existir, proceda com a remoção
       database.delete("tasks", id);
+
+      return res.writeHead(204).end(); // 204 => Deu certo, mas não tem msg de conteudo
+    },
+  },
+  {
+    method: "PATCH",
+    path: buildRoutePath("/tasks/:id/complete"),
+    handler: (req, res) => {
+      const { id } = req.params;
+
+      // Verifica se o ID da task existe no banco de dados
+      const [task] = database.findById("tasks", { id });
+      if (!task) {
+        // Se a task não for encontrada, retorna uma resposta com status 404 (Not Found)
+        return res.writeHead(404).end("Task não encontrada.");
+      }
+
+      // Determina o novo estado de conclusão da task
+      const isTaskCompleted = !!task.completed_at;
+      const completed_at = isTaskCompleted ? null : new Date();
+
+      // Atualiza a task no banco de dados com o novo estado de conclusão
+      database.update("task", id, {
+        completed_at,
+      });
 
       return res.writeHead(204).end(); // 204 => Deu certo, mas não tem msg de conteudo
     },

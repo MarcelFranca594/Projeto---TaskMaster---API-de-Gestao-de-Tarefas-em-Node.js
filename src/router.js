@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Database } from "./database.js";
 import { buildRoutePath } from "./utils/build-route-path.js";
+import { json } from "./middleware/json.js";
 
 const database = new Database();
 
@@ -27,11 +28,17 @@ export const routes = [
       const { title, description } = req.body;
 
       if (!title) {
-        return res.writeHead(400).end("Title são campos obrigatórios.");
+        return res
+          .writeHead(400)
+          .end(JSON.stringify({ message: "Title são campos obrigatórios." }));
       }
 
       if (!description) {
-        return res.writeHead(400).end("Description são campos obrigatórios.");
+        return res
+          .writeHead(400)
+          .end(
+            JSON.stringify({ message: "Description são campos obrigatórios." })
+          );
       }
 
       const task = {
@@ -48,6 +55,55 @@ export const routes = [
       return res.writeHead(201).end();
       //.whiteHead => informa o http status code | 201 Created
       //return res.end("Criação de usuário");
+    },
+  },
+  {
+    method: "PUT",
+    path: buildRoutePath("/tasks/:id"),
+    handler: (req, res) => {
+      const { id } = req.params;
+      const { title, description } = req.body;
+
+      if (!title && !description) {
+        return res.writeHead(400).end(
+          JSON.stringify({
+            message: "Title e Description são campos obrigatórios.",
+          })
+        );
+      }
+
+      // Verifica se o ID da task existe no banco de dados
+      const [task] = database.findById("tasks", { id });
+      if (!task) {
+        return res.writeHead(404).end("Task não encontrada.");
+      }
+
+      database.update("tasks", id, {
+        title: title ?? task.title,
+        description: description ?? task.description,
+        updated_at: new Date(),
+      });
+
+      return res.writeHead(204).end();
+    },
+  },
+  {
+    method: "DELETE",
+    path: buildRoutePath("/tasks/:id"),
+    handler: (req, res) => {
+      const { id } = req.params;
+
+      // Verifica se o ID da task existe no banco de dados
+      const [task] = database.findById("tasks", { id });
+      if (!task) {
+        // Se a task não for encontrada, retorna uma resposta com status 404 (Not Found)
+        return res.writeHead(404).end("Task não encontrada.");
+      }
+
+      // Se a task existir, proceda com a remoção
+      database.delete("tasks", id);
+
+      return res.writeHead(204).end(); // 204 => Deu certo, mas não tem msg de conteudo
     },
   },
 ];

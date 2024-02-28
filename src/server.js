@@ -3,17 +3,6 @@ import { json } from "./middleware/json.js";
 import { routes } from "./router.js";
 import { extractQueryParams } from "./utils/extract-query-params.js";
 
-/*
-- Criar usuários
-- Listagem usuários
-- Edição de usuários
-- Remoção de usuários
-
-
-*/
-
-//const database = new Database();
-
 const server = http.createServer(async (req, res) => {
   const { method, url } = req; // Extrai o método e a URL da requisição.
 

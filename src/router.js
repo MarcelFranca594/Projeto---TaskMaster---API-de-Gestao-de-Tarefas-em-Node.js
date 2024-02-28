@@ -10,7 +10,7 @@ export const routes = [
     method: "POST",
     path: buildRoutePath("/tasks"),
     handler: (req, res) => {
-      const { title, description } = req.body || {};
+      const { title, description } = req.body;
 
       if (!title) {
         return res

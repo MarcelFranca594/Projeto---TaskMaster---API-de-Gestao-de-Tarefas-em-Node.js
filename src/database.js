@@ -27,7 +27,9 @@ export class Database {
     if (search) {
       data = data.filter((row) => {
         return Object.entries(search).some(([key, value]) => {
-          return row[key].toLowerCase().includes(value.toLowerCase());
+          if (!value) return true;
+
+          return row[key].includes(value);
         });
       });
     }
